@@ -63,8 +63,8 @@ A full-featured blog application built with Django that supports user authentica
 
 2. **Create and activate a virtual environment**
    ```bash
-   git clone <repository-url>
-   cd django-blog
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 3. **Install dependencies**
    ```bash
