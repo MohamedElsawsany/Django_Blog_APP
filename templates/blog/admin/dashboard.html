@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - Django Blog{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Admin Dashboard</h2>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card text-white bg-primary mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ posts_count }}</h4>
+                                <p>Posts</p>
+                            </div>
+                            <div>
+                                <i class="fas fa-file-alt fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ categories_count }}</h4>
+                                <p>Categories</p>
+                            </div>
+                            <div>
+                                <i class="fas fa-folder fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-white bg-warning mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ users_count }}</h4>
+                                <p>Users</p>
+                            </div>
+                            <div>
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-white bg-info mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ comments_count }}</h4>
+                                <p>Comments</p>
+                            </div>
+                            <div>
+                                <i class="fas fa-comments fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <a href="{% url 'blog:admin_posts' %}" class="btn btn-primary btn-block mb-2">
+                            <i class="fas fa-file-alt"></i> Manage Posts
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'blog:admin_categories' %}" class="btn btn-success btn-block mb-2">
+                            <i class="fas fa-folder"></i> Manage Categories
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'blog:admin_users' %}" class="btn btn-warning btn-block mb-2">
+                            <i class="fas fa-users"></i> Manage Users
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'blog:admin_forbidden_words' %}" class="btn btn-danger btn-block mb-2">
+                            <i class="fas fa-ban"></i> Forbidden Words
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

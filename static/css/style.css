@@ -1,0 +1,53 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.post-content {
+    line-height: 1.6;
+}
+
+.comment {
+    background-color: #f8f9fa;
+}
+
+.reply {
+    border-left: 3px solid #007bff;
+}
+
+.subscribe-btn {
+    font-size: 0.8em;
+}
+
+.admin-sidebar {
+    background-color: #343a40;
+    min-height: 100vh;
+}
+
+.admin-sidebar .nav-link {
+    color: #fff;
+}
+
+.admin-sidebar .nav-link:hover {
+    background-color: #495057;
+}
+
+.card-stats {
+    transition: transform 0.2s;
+}
+
+.card-stats:hover {
+    transform: translateY(-5px);
+}
+
+.pagination {
+    margin-top: 2rem;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.post-image {
+    max-height: 300px;
+    object-fit: cover;
+}

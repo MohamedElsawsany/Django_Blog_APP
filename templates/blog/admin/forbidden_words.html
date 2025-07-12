@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Forbidden Words - Django Blog{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Forbidden Words</h2>
+            <a href="{% url 'blog:admin_dashboard' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Word</th>
+                                <th>Added</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for word in words %}
+                                <tr>
+                                    <td>{{ word.word }}</td>
+                                    <td>{{ word.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-danger delete-btn" 
+                                                onclick="deleteWord({{ word.pk }})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No forbidden words added</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Add Forbidden Word</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'blog:admin_forbidden_words' %}">
+                    {% csrf_token %}
+                    <div class="form-group mb-3">
+                        <label for="word">Word</label>
+                        <input type="text" class="form-control" name="word" id="word" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Word
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>Information</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    Words added here will be automatically censored in comments and replies.
+                    They will be replaced with asterisks (*) of the same length.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteWord(wordId) {
+    if (confirm('Are you sure you want to remove this forbidden word?')) {
+        // You can implement the delete functionality here
+        alert('Delete functionality needs to be implemented in views.py');
+    }
+}
+</script>
+{% endblock %}

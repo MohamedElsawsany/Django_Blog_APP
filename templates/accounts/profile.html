@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Profile - Django Blog{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(to right, #e0eafc, #cfdef3);
+    }
+    .profile-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card profile-card border-0 rounded-4 shadow-lg">
+                <div class="card-body text-center p-5">
+                    <!-- Avatar -->
+                    <img src="{% static 'img/avatar.png' %}" alt="User Avatar"
+                         class="rounded-circle shadow mb-4" width="120" height="120">
+
+                    <!-- User Info -->
+                    <h3 class="fw-bold">{{ user.username|title }}</h3>
+                    <p class="text-muted">Joined on {{ user.date_joined|date:"F d, Y" }}</p>
+
+                    <hr class="my-4">
+
+                    <!-- Details -->
+                    <div class="text-start px-md-5">
+                        <p class="mb-2">
+                            <i class="fa-solid fa-user text-primary me-2"></i>
+                            <strong>Username:</strong> {{ user.username }}
+                        </p>
+                        <p class="mb-2">
+                            <i class="fa-solid fa-envelope text-primary me-2"></i>
+                            <strong>Email:</strong> {{ user.email }}
+                        </p>
+                        <p>
+                            <i class="fa-solid fa-circle-info text-primary me-2"></i>
+                            <strong>Status:</strong>
+                            {% if user.is_blocked %}
+                                <span class="badge bg-danger">Blocked</span>
+                            {% else %}
+                                <span class="badge bg-success">Active</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

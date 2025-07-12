@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - Django Blog{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5>Categories</h5>
+            </div>
+            <div class="card-body">
+                {% for category in categories %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <a href="{% url 'blog:category_posts' category.id %}" class="text-decoration-none">
+                            {{ category.name }}
+                        </a>
+                        {% if user.is_authenticated %}
+                            <button class="btn btn-sm btn-outline-primary subscribe-btn"
+                                    data-category-id="{{ category.id }}">
+                                {% if category.id in user_subscriptions %}
+                                    Unsubscribe
+                                {% else %}
+                                    Subscribe
+                                {% endif %}
+                            </button>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Search Form -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>Search</h5>
+            </div>
+            <div class="card-body">
+                <form method="get" action="{% url 'blog:search' %}">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Search posts...">
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-9">
+        <h2>Top Posts</h2>
+
+        {% for post in page_obj %}
+            <div class="card mb-4">
+                <div class="row g-0">
+                    {% if post.image %}
+                        <div class="col-md-4">
+                            <a href="{% url 'blog:post_detail' post.pk %}">
+                                <img src="{{ post.image.url }}" class="img-fluid rounded-start h-100" alt="{{ post.title }}">
+                            </a>
+                        </div>
+                    {% endif %}
+                    <div class="col-md-{% if post.image %}8{% else %}12{% endif %}">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a href="{% url 'blog:post_detail' post.pk %}" class="text-decoration-none">
+                                    {{ post.title }}
+                                </a>
+                            </h5>
+                            <p class="card-text">{{ post.content|truncatewords:30 }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted">
+                                        By {{ post.author.username }} in {{ post.category.name }}
+                                    </small>
+                                </div>
+                                <div>
+                                    <span class="text-success">
+                                        <i class="fas fa-thumbs-up"></i> {{ post.total_likes }}
+                                    </span>
+                                    <span class="text-danger ms-2">
+                                        <i class="fas fa-thumbs-down"></i> {{ post.total_dislikes }}
+                                    </span>
+                                </div>
+                            </div>
+                            <small class="text-muted">{{ post.created_at|date:"M d, Y" }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p>No posts available.</p>
+        {% endfor %}
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    $('.subscribe-btn').click(function() {
+        var categoryId = $(this).data('category-id');
+        var button = $(this);
+
+        $.ajax({
+            url: '{% url "blog:toggle_subscription" 0 %}'.replace('0', categoryId),
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(data) {
+                if (data.subscribed) {
+                    button.text('Unsubscribe');
+                    button.removeClass('btn-outline-primary').addClass('btn-primary');
+                } else {
+                    button.text('Subscribe');
+                    button.removeClass('btn-primary').addClass('btn-outline-primary');
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

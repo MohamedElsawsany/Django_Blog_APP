@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ post.title }} - Django Blog{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <article class="card">
+            {% if post.image %}
+                <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
+            {% endif %}
+            <div class="card-body">
+                <h1 class="card-title">{{ post.title }}</h1>
+                <p class="text-muted">
+                    By {{ post.author.username }} in {{ post.category.name }}
+                    on {{ post.created_at|date:"F d, Y" }}
+                </p>
+
+                {% if post.tags %}
+                    <div class="mb-3">
+                        {% for tag in post.get_tags_list %}
+                            <span class="badge bg-secondary me-1">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="post-content">
+                    {{ post.content|linebreaks }}
+                </div>
+
+                {% if user.is_authenticated %}
+                    <div class="d-flex gap-2 mt-3">
+                        <button class="btn btn-success like-btn" data-post-id="{{ post.id }}">
+                            <i class="fas fa-thumbs-up"></i>
+                            <span class="likes-count">{{ post.total_likes }}</span>
+                        </button>
+                        <button class="btn btn-danger dislike-btn" data-post-id="{{ post.id }}">
+                            <i class="fas fa-thumbs-down"></i>
+                            <span class="dislikes-count">{{ post.total_dislikes }}</span>
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </article>
+
+        <!-- Comments Section -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Comments ({{ comments.count }})</h5>
+            </div>
+            <div class="card-body">
+                {% if user.is_authenticated %}
+                    <form method="post" class="mb-4">
+                        {% csrf_token %}
+                        <input type="hidden" name="comment_form" value="1">
+                        <div class="form-group mb-3">
+                            {{ comment_form.content.label_tag }}
+                            {{ comment_form.content }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Comment</button>
+                    </form>
+                {% else %}
+                    <p><a href="{% url 'accounts:login' %}">Login</a> to add a comment.</p>
+                {% endif %}
+
+                {% for comment in comments %}
+                    <div class="comment mb-3 p-3 border rounded">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ comment.author.username }}</strong>
+                            <small class="text-muted">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+                        </div>
+                        <p class="mt-2">{{ comment.get_censored_content|linebreaks }}</p>
+
+                        <!-- Reply Section -->
+                        {% if user.is_authenticated %}
+                            <button class="btn btn-sm btn-outline-primary reply-toggle"
+                                    data-comment-id="{{ comment.id }}">
+                                Reply
+                            </button>
+                        {% endif %}
+
+                        {% if user.is_authenticated %}
+                            <div class="reply-form mt-2" id="reply-form-{{ comment.id }}" style="display: none;">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="reply_form" value="1">
+                                    <input type="hidden" name="comment_id" value="{{ comment.id }}">
+                                    {{ reply_form.content }}
+                                    <button type="submit" class="btn btn-sm btn-primary mt-2">Reply</button>
+                                </form>
+                            </div>
+                        {% endif %}
+
+                        <!-- Display Replies -->
+                        {% for reply in comment.replies.all %}
+                            <div class="reply ms-4 mt-2 p-2 bg-light rounded">
+                                <div class="d-flex justify-content-between">
+                                    <strong>{{ reply.author.username }}</strong>
+                                    <small class="text-muted">{{ reply.created_at|date:"M d, Y H:i" }}</small>
+                                </div>
+                                <p class="mt-1">{{ reply.get_censored_content|linebreaks }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% empty %}
+                    <p>No comments yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Related Posts</h5>
+            </div>
+            <div class="card-body">
+                <!-- You can add related posts logic here -->
+                <p>Related posts feature coming soon...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Like/Dislike functionality
+    $('.like-btn').click(function() {
+        var postId = $(this).data('post-id');
+        var button = $(this);
+
+        $.ajax({
+            url: '{% url "blog:toggle_like" 0 %}'.replace('0', postId),
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(data) {
+                if (data.deleted) {
+                    alert('Post was deleted due to too many dislikes');
+                    window.location.href = '{% url "blog:home" %}';
+                } else {
+                    button.find('.likes-count').text(data.likes_count);
+                    $('.dislike-btn .dislikes-count').text(data.dislikes_count);
+                }
+            }
+        });
+    });
+
+    $('.dislike-btn').click(function() {
+        var postId = $(this).data('post-id');
+        var button = $(this);
+
+        $.ajax({
+            url: '{% url "blog:toggle_dislike" 0 %}'.replace('0', postId),
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(data) {
+                if (data.deleted) {
+                    alert('Post was deleted due to too many dislikes');
+                    window.location.href = '{% url "blog:home" %}';
+                } else {
+                    button.find('.dislikes-count').text(data.dislikes_count);
+                    $('.like-btn .likes-count').text(data.likes_count);
+                }
+            }
+        });
+    });
+
+    // Reply toggle
+    $('.reply-toggle').click(function() {
+        var commentId = $(this).data('comment-id');
+        $('#reply-form-' + commentId).toggle();
+    });
+});
+</script>
+{% endblock %}

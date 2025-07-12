@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ category.name }} - Django Blog{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>{{ category.name }}</h2>
+            <a href="{% url 'blog:home' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+        
+        {% if category.description %}
+            <p class="text-muted mb-4">{{ category.description }}</p>
+        {% endif %}
+        
+        {% for post in page_obj %}
+            <div class="card mb-4">
+                <div class="row g-0">
+                    {% if post.image %}
+                        <div class="col-md-4">
+                            <a href="{% url 'blog:post_detail' post.pk %}">
+                                <img src="{{ post.image.url }}" class="img-fluid rounded-start h-100" alt="{{ post.title }}">
+                            </a>
+                        </div>
+                    {% endif %}
+                    <div class="col-md-{% if post.image %}8{% else %}12{% endif %}">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a href="{% url 'blog:post_detail' post.pk %}" class="text-decoration-none">
+                                    {{ post.title }}
+                                </a>
+                            </h5>
+                            <p class="card-text">{{ post.content|truncatewords:30 }}</p>
+                            
+                            {% if post.tags %}
+                                <div class="mb-2">
+                                    {% for tag in post.get_tags_list %}
+                                        <span class="badge bg-secondary me-1">{{ tag }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted">
+                                        By {{ post.author.username }} on {{ post.created_at|date:"M d, Y" }}
+                                    </small>
+                                </div>
+                                <div>
+                                    <span class="text-success">
+                                        <i class="fas fa-thumbs-up"></i> {{ post.total_likes }}
+                                    </span>
+                                    <span class="text-danger ms-2">
+                                        <i class="fas fa-thumbs-down"></i> {{ post.total_dislikes }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5>No posts found in this category</h5>
+                    <p class="text-muted">Check back later for new posts!</p>
+                </div>
+            </div>
+        {% endfor %}
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
